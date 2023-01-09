@@ -1,7 +1,7 @@
 import os
 
 from django.http import Http404, HttpResponse
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
 
 from dino.models import Dinosaur
 from api.serializers import DinosaurSerializer
@@ -20,6 +20,14 @@ def docs(request):
 
 
 class DinosaurListView(ListCreateAPIView):
+    serializer_class = DinosaurSerializer
+    permission_classes = []
+
+    def get_queryset(self):
+        return Dinosaur.objects.all()
+
+
+class DinosaurView(RetrieveAPIView):
     serializer_class = DinosaurSerializer
     permission_classes = []
 
