@@ -75,3 +75,29 @@ paths:
                 - id: 1
                   common_name: T-Rex
                   scientific_name: Tyrannosaurus Rex
+  /api/dinosaurs/{id}/:
+      get:
+        summary: Get a dino
+        description: Retrieve a dinosaur by id
+        parameters:
+          - in: path
+            name: id
+            schema:
+              type: integer
+            required: true
+            description: Unique identifier of dino
+            example: 1
+        responses:
+          "200":
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    common_name:
+                      type: string
+                    scientific_name:
+                      type: string
