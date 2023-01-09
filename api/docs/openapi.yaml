@@ -1,0 +1,77 @@
+openapi: 3.1.0
+info:
+  title: RESTful dinosaurs
+  version: 0.0.1
+servers:
+  - url: http://localhost:8000
+    description: Local development environment
+paths:
+  /api/dinosaurs/:
+    post:
+      summary: Add a dinosaur
+      description: Add a dinosaur
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                common_name:
+                  type: string
+                scientific_name:
+                  type: string
+              required:
+                - common_name
+                - scientific_name
+            example:
+              common_name: T-Rex
+              scientific_name: Tyrannosaurus Rex
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  common_name:
+                    type: string
+                  scientific_name:
+                    type: string
+                required:
+                  - id
+                  - common_name
+                  - scientific_name
+                example:
+                  id: 1
+                  common_name: T-Rex
+                  scientific_name: Tyrannosaurus Rex
+    get:
+      summary: Retrieve a list of dinosaurs
+      description: Retrieve a list of all dinosaurs
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    common_name:
+                      type: string
+                    scientific_name:
+                      type: string
+                  required:
+                    - id
+                    - common_name
+                    - scientific_name
+              example:
+                - id: 1
+                  common_name: T-Rex
+                  scientific_name: Tyrannosaurus Rex

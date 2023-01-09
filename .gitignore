@@ -1,0 +1,5 @@
+api/docs/*.html
+.idea
+__pycache__
+*.sqlite3
+.python-version
