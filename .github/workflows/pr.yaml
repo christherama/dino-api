@@ -49,6 +49,7 @@ jobs:
       packages: write
     needs:
       - image-tag
+      - build-api-image
     steps:
       - uses: actions/checkout@v3
       - name: Log in to GHCR
