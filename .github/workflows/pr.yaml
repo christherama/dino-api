@@ -83,7 +83,7 @@ jobs:
         - ${{ github.workspace }}/db/db.sqlite3:/usr/app/db.sqlite3
     steps:
       - name: Migrate database
-        run: python manage.py migrate
+        run: python /usr/app/manage.py migrate
   run-contract-tests:
     name: Run API Contract Tests
     runs-on: ubuntu-22.04
