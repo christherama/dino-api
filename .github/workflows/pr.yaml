@@ -4,6 +4,7 @@ on: [pull_request]
 
 jobs:
   image-tag:
+    name: Extract Image Tag
     runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.tag.outputs.TAG }}
