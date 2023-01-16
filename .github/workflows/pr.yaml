@@ -11,12 +11,15 @@ jobs:
       - uses: actions/checkout@v3
       - id: tag
         run: |
-          TAG=main-$(git rev-parse --short HEAD)
+          TAG=${{ github.ref_name }}-$(git rev-parse --short HEAD)
           echo "::notice title=Docker Image Tag::${TAG}"
           echo "TAG=${TAG}" >> $GITHUB_OUTPUT
   build-api-image:
     name: Build and Push API Image
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
     needs:
       - image-tag
     steps:
@@ -66,6 +69,9 @@ jobs:
   create-migrated-database:
     name: Create Migrated Database
     runs-on: ubuntu-22.04
+    needs:
+      - image-tag
+      - build-api-image
     container:
       image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
       credentials:
@@ -82,6 +88,7 @@ jobs:
     needs:
       - image-tag
       - build-api-image
+      - create-migrated-database
     services:
       django:
         image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
