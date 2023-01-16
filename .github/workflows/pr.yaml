@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v3
       - id: tag
         run: |
-          TAG=${{ github.ref_name }}-$(git rev-parse --short HEAD)
+          TAG="${GITHUB_HEAD_REF}-$(git rev-parse --short HEAD)"
           echo "::notice title=Docker Image Tag::${TAG}"
           echo "TAG=${TAG}" >> $GITHUB_OUTPUT
   build-api-image:
