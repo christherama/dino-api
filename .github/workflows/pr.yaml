@@ -1,0 +1,99 @@
+name: Pull Request
+
+on: [pull_request]
+
+jobs:
+  image-tag:
+    runs-on: ubuntu-22.04
+    outputs:
+      tag: ${{ steps.tag.outputs.TAG }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: tag
+        run: |
+          TAG=main-$(git rev-parse --short HEAD)
+          echo "::notice title=Docker Image Tag::${TAG}"
+          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+  build-api-image:
+    name: Build and Push API Image
+    runs-on: ubuntu-22.04
+    needs:
+      - image-tag
+    steps:
+      - uses: actions/checkout@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }},ghcr.io/${{ github.repository }}/django:main-latest
+  build-mock-api-server:
+    name: Build and Push Mock API Image
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+    needs:
+      - image-tag
+    steps:
+      - uses: actions/checkout@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: mock/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/mock-api:${{ needs.image-tag.outputs.tag }},ghcr.io/${{ github.repository }}/mock-api:main-latest
+  create-migrated-database:
+    name: Create Migrated Database
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      volumes:
+        - ${{ github.workspace }}/db/db.sqlite3:/usr/app/db.sqlite3
+    steps:
+      - name: Migrate database
+        run: python manage.py migrate
+  run-contract-tests:
+    name: Run API Contract Tests
+    runs-on: ubuntu-22.04
+    needs:
+      - image-tag
+      - build-api-image
+    services:
+      django:
+        image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        volumes:
+          - ${{ github.workspace }}/db/db.sqlite3:/usr/app/db.sqlite3
+    container:
+      image: apiaryio/dredd:14.0.0
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run tests
+        run: |
+          dredd api/docs/openapi.yaml http://django:8000
