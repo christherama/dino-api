@@ -40,7 +40,7 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }},ghcr.io/${{ github.repository }}/django:main-latest
+          tags: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
   build-mock-api-server:
     name: Build and Push Mock API Image
     runs-on: ubuntu-22.04
@@ -65,7 +65,7 @@ jobs:
           context: .
           file: mock/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/mock-api:${{ needs.image-tag.outputs.tag }},ghcr.io/${{ github.repository }}/mock-api:main-latest
+          tags: ghcr.io/${{ github.repository }}/mock-api:${{ needs.image-tag.outputs.tag }}
   create-migrated-database:
     name: Create Migrated Database
     runs-on: ubuntu-22.04
