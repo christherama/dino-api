@@ -113,8 +113,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: db.sqlite3
-          path: ${{ github.workspace }}/db/db.sqlite3
+          path: db/db.sqlite3
       - name: Run tests
         run: |
-          chmod 777 ${{ github.workspace }}/db/db.sqlite3
+          chmod 777 db/db.sqlite3
           dredd api/docs/openapi.yaml http://django:8000
