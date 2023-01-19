@@ -80,11 +80,10 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
       volumes:
-        - ${{ github.workspace }}/db/db.sqlite3:/usr/app/db/db.sqlite3
+        - ${{ github.workspace }}/db:/usr/app/db
     steps:
       - name: Migrate database
         run: |
-          mkdir /usr/app/db
           python /usr/app/manage.py migrate
   run-contract-tests:
     name: Run API Contract Tests
