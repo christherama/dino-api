@@ -103,8 +103,6 @@ jobs:
         credentials:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-        volumes:
-          - ${{ github.workspace }}/api/docs:/usr/app/api/docs
         options: --entrypoint /usr/app/bin/migrate-and-run
 #        volumes:
 #          - ${{ github.workspace }}/db:/usr/app/db
@@ -128,5 +126,6 @@ jobs:
 #            mkdir db
 #            python manage.py migrate
 #            python manage.py runserver
+      - uses: actions/checkout@v3
       - name: Run tests
-        run: dredd ${{ github.workspace }}/api/docs http://django:8000
+        run: dredd api/docs/openapi.yaml http://django:8000
