@@ -122,6 +122,7 @@ jobs:
           image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
           options: -p 8000:8000
           run: |
+            mkdir db
             python manage.py migrate
             python manage.py runserver
       - name: Run tests
