@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
+mkdir db
 python manage.py migrate
 uwsgi --ini uwsgi.ini --http :8000
