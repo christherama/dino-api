@@ -116,4 +116,5 @@ jobs:
           path: ${{ github.workspace }}/db/db.sqlite3
       - name: Run tests
         run: |
+          chmod 777 ${{ github.workspace }}/db/db.sqlite3
           dredd api/docs/openapi.yaml http://django:8000
