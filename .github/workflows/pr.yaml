@@ -85,6 +85,11 @@ jobs:
       - name: Migrate database
         run: |
           python /usr/app/manage.py migrate
+      - name: Upload SQLite database
+        uses: actions/upload-artifact@v3
+        with:
+          name: db.sqlite3
+          path: ${{ github.workspace }}/db/db.sqlite3
   run-contract-tests:
     name: Run API Contract Tests
     runs-on: ubuntu-22.04
@@ -99,11 +104,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
         volumes:
-          - ${{ github.workspace }}/db/db.sqlite3:/usr/app/db.sqlite3
+          - ${{ github.workspace }}/db:/usr/app/db
     container:
       image: apiaryio/dredd:14.0.0
     steps:
       - uses: actions/checkout@v3
+      - name: Download SQLite database
+        uses: actions/download-artifact@v3
+        with:
+          name: db.sqlite3
+          path: ${{ github.workspace }}/db/db.sqlite3
       - name: Run tests
         run: |
           dredd api/docs/openapi.yaml http://django:8000
