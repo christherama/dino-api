@@ -97,12 +97,15 @@ jobs:
       - image-tag
       - build-api-image
 #      - create-migrated-database
-#    services:
-#      django:
-#        image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
-#        credentials:
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
+    services:
+      django:
+        image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        volumes:
+          - ${{ github.workspace }}/api/docs:/usr/app/api/docs
+        options: --entrypoint /usr/app/bin/migrate-and-run
 #        volumes:
 #          - ${{ github.workspace }}/db:/usr/app/db
     container:
@@ -113,19 +116,17 @@ jobs:
 #        with:
 #          name: db.sqlite3
 #          path: db/db.sqlite3
-      - name: Run API
-        uses: addnab/docker-run-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
-          options: -p 8000:8000
-          run: |
-            mkdir db
-            python manage.py migrate
-            python manage.py runserver
+#      - name: Run API
+#        uses: addnab/docker-run-action@v3
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#          image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+#          options: -p 8000:8000
+#          run: |
+#            mkdir db
+#            python manage.py migrate
+#            python manage.py runserver
       - name: Run tests
-        run: |
-          chmod a+w db/db.sqlite3
-          dredd api/docs/openapi.yaml http://localhost:8000
+        run: dredd ${{ github.workspace }}/api/docs http://django:8000
