@@ -108,11 +108,11 @@ jobs:
     container:
       image: apiaryio/dredd:14.0.0
     steps:
-      - name: Download SQLite database
-        uses: actions/download-artifact@v3
-        with:
-          name: db.sqlite3
-          path: db/db.sqlite3
+#      - name: Download SQLite database
+#        uses: actions/download-artifact@v3
+#        with:
+#          name: db.sqlite3
+#          path: db/db.sqlite3
       - name: Run API
         uses: addnab/docker-run-action@v3
         with:
