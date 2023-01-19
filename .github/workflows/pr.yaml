@@ -68,35 +68,12 @@ jobs:
           file: mock/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}/mock-api:${{ needs.image-tag.outputs.tag }}
-#  create-migrated-database:
-#    name: Create Migrated Database
-#    runs-on: ubuntu-22.04
-#    needs:
-#      - image-tag
-#      - build-api-image
-#    container:
-#      image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
-#      credentials:
-#        username: ${{ github.actor }}
-#        password: ${{ secrets.GITHUB_TOKEN }}
-#      volumes:
-#        - ${{ github.workspace }}/db:/usr/app/db
-#    steps:
-#      - name: Migrate database
-#        run: |
-#          python /usr/app/manage.py migrate
-#      - name: Upload SQLite database
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: db.sqlite3
-#          path: ${{ github.workspace }}/db/db.sqlite3
   run-contract-tests:
     name: Run API Contract Tests
     runs-on: ubuntu-22.04
     needs:
       - image-tag
       - build-api-image
-#      - create-migrated-database
     services:
       django:
         image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
@@ -104,28 +81,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
         options: --entrypoint /usr/app/bin/migrate-and-run
-#        volumes:
-#          - ${{ github.workspace }}/db:/usr/app/db
     container:
       image: apiaryio/dredd:14.0.0
     steps:
-#      - name: Download SQLite database
-#        uses: actions/download-artifact@v3
-#        with:
-#          name: db.sqlite3
-#          path: db/db.sqlite3
-#      - name: Run API
-#        uses: addnab/docker-run-action@v3
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
-#          image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
-#          options: -p 8000:8000
-#          run: |
-#            mkdir db
-#            python manage.py migrate
-#            python manage.py runserver
       - uses: actions/checkout@v3
       - name: Run tests
         run: dredd api/docs/openapi.yaml http://django:8000
