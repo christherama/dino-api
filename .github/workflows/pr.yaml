@@ -68,53 +68,63 @@ jobs:
           file: mock/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}/mock-api:${{ needs.image-tag.outputs.tag }}
-  create-migrated-database:
-    name: Create Migrated Database
-    runs-on: ubuntu-22.04
-    needs:
-      - image-tag
-      - build-api-image
-    container:
-      image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-      volumes:
-        - ${{ github.workspace }}/db:/usr/app/db
-    steps:
-      - name: Migrate database
-        run: |
-          python /usr/app/manage.py migrate
-      - name: Upload SQLite database
-        uses: actions/upload-artifact@v3
-        with:
-          name: db.sqlite3
-          path: ${{ github.workspace }}/db/db.sqlite3
+#  create-migrated-database:
+#    name: Create Migrated Database
+#    runs-on: ubuntu-22.04
+#    needs:
+#      - image-tag
+#      - build-api-image
+#    container:
+#      image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+#      credentials:
+#        username: ${{ github.actor }}
+#        password: ${{ secrets.GITHUB_TOKEN }}
+#      volumes:
+#        - ${{ github.workspace }}/db:/usr/app/db
+#    steps:
+#      - name: Migrate database
+#        run: |
+#          python /usr/app/manage.py migrate
+#      - name: Upload SQLite database
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: db.sqlite3
+#          path: ${{ github.workspace }}/db/db.sqlite3
   run-contract-tests:
     name: Run API Contract Tests
     runs-on: ubuntu-22.04
     needs:
       - image-tag
       - build-api-image
-      - create-migrated-database
-    services:
-      django:
-        image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
-        credentials:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-        volumes:
-          - ${{ github.workspace }}/db:/usr/app/db
+#      - create-migrated-database
+#    services:
+#      django:
+#        image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+#        credentials:
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#        volumes:
+#          - ${{ github.workspace }}/db:/usr/app/db
     container:
       image: apiaryio/dredd:14.0.0
     steps:
-      - uses: actions/checkout@v3
       - name: Download SQLite database
         uses: actions/download-artifact@v3
         with:
           name: db.sqlite3
           path: db/db.sqlite3
+      - name: Run API
+        uses: addnab/docker-run-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          image: ${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+          options: -p 8000:8000
+          run: |
+            python manage.py migrate
+            python manage.py runserver
       - name: Run tests
         run: |
-          chmod 777 db/db.sqlite3
-          dredd api/docs/openapi.yaml http://django:8000
+          chmod a+w db/db.sqlite3
+          dredd api/docs/openapi.yaml http://localhost:8000
