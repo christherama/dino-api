@@ -54,6 +54,7 @@ jobs:
         credentials:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+        options: --entrypoint /usr/app/bin/migrate-and-run
     container:
       image: apiaryio/dredd:14.0.0
     steps:
