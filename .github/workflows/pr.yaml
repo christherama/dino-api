@@ -4,6 +4,7 @@ on: [pull_request]
 
 jobs:
   image-tag:
+    name: Extract Image Tag
     runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.tag.outputs.TAG }}
@@ -11,12 +12,15 @@ jobs:
       - uses: actions/checkout@v3
       - id: tag
         run: |
-          TAG=main-$(git rev-parse --short HEAD)
+          TAG="${GITHUB_HEAD_REF}-$(git rev-parse --short HEAD)"
           echo "::notice title=Docker Image Tag::${TAG}"
           echo "TAG=${TAG}" >> $GITHUB_OUTPUT
   build-api-image:
     name: Build and Push API Image
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
     needs:
       - image-tag
     steps:
@@ -37,4 +41,23 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          tags: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }},ghcr.io/${{ github.repository }}/django:main-latest
+          tags: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+  run-contract-tests:
+    name: Run API Contract Tests
+    runs-on: ubuntu-22.04
+    needs:
+      - image-tag
+      - build-api-image
+    services:
+      django:
+        image: ghcr.io/${{ github.repository }}/django:${{ needs.image-tag.outputs.tag }}
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+        options: --entrypoint /usr/app/bin/migrate-and-run
+    container:
+      image: apiaryio/dredd:14.0.0
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run tests
+        run: dredd api/docs/openapi.yaml http://django:8000
