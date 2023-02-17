@@ -23,9 +23,12 @@ paths:
               required:
                 - common_name
                 - scientific_name
-            example:
-              common_name: T-Rex
-              scientific_name: Tyrannosaurus Rex
+            examples:
+              trex:
+                summary: T-Rex
+                value:
+                  common_name: T-Rex
+                  scientific_name: Tyrannosaurus Rex
       responses:
         "201":
           description: Created
@@ -44,10 +47,13 @@ paths:
                   - id
                   - common_name
                   - scientific_name
-                example:
-                  id: 1
-                  common_name: T-Rex
-                  scientific_name: Tyrannosaurus Rex
+              examples:
+                trex:
+                  summary: T-Rex
+                  value:
+                    id: 1
+                    common_name: T-Rex
+                    scientific_name: Tyrannosaurus Rex
     get:
       summary: Retrieve a list of dinosaurs
       description: Retrieve a list of all dinosaurs
@@ -71,10 +77,13 @@ paths:
                     - id
                     - common_name
                     - scientific_name
-              example:
-                - id: 1
-                  common_name: T-Rex
-                  scientific_name: Tyrannosaurus Rex
+              examples:
+                one:
+                  summary: Only one dino here
+                  value:
+                    - id: 1
+                      common_name: T-Rex
+                      scientific_name: Tyrannosaurus Rex
   /api/dinosaurs/{id}/:
       get:
         summary: Get a dino
@@ -101,3 +110,10 @@ paths:
                       type: string
                     scientific_name:
                       type: string
+                examples:
+                  trex:
+                    summary: T-Rex
+                    value:
+                      id: 1
+                      common_name: T-Rex
+                      scientific_name: Tyrannosaurus Rex
