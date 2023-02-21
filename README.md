@@ -15,18 +15,28 @@ To build the Docker image containing the API:
 docker build -t dino-api:local .
 ```
 
-## Resetting the Database
+## Starting the database locally
 
-To drop all data and start with a fresh (migrated) database:
+The app is configured to work with PostgreSQL 13. To start the database, use the following:
+
+```bash
+docker run -d --name postgres \
+  -e POSTGRESQL_DATABASE=dino \
+  -e POSTGRESQL_USERNAME=dino \
+  -e POSTGRESQL_PASSWORD=password \
+  -p 5432:5432 \
+  bitnami/postgresql:13
+```
+
+## Migrating the Database
 
 ```shell
-rm db/db.sqlite3
 docker run -v $(pwd)/db:/usr/app/db dino-api:local python manage.py migrate
 ```
 
 ## Running the API
 
-To run the API after migrating the database (see [above](#resetting-the-database)):
+To run the API after starting and migrating the database:
 
 ```shell
 docker run -p 8000:8000 -v $(pwd)/db:/usr/app/db dino-api:local
@@ -34,11 +44,11 @@ docker run -p 8000:8000 -v $(pwd)/db:/usr/app/db dino-api:local
 
 ## Viewing the API Docs:
 
-To view the generated API documentation after starting the API (see [above](#running-the-api)), navigate to [localhost:8000/api/docs/](http://localhost:8000/api/docs/).
+To view the generated API documentation after starting the API, navigate to [localhost:8000/api/docs/](http://localhost:8000/api/docs/).
 
 ## Generating and Running Contract Tests
 
-To run contract tests after starting the API (see [above](#running-the-api)):
+To run contract tests after starting the API:
 
 ```shell
 docker run \
